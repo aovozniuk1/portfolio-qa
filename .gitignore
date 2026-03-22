@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Java
+target/
+*.class
+.idea/
+*.iml
+
+# IDE
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Reports (generated)
+allure-results/
+allure-report/
+
+# Screenshots (generated during test runs)
+screenshots/

@@ -1,0 +1,25 @@
+[
+  {
+    "name": "Product Defects",
+    "description": "Test failures caused by actual product bugs",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*Assert.*"
+  },
+  {
+    "name": "Test Environment Issues",
+    "description": "Failures caused by environment problems (timeouts, connectivity)",
+    "matchedStatuses": ["broken"],
+    "messageRegex": ".*Timeout.*|.*Connection.*|.*WebDriver.*"
+  },
+  {
+    "name": "Known Issues",
+    "description": "Tests skipped due to known bugs or limitations",
+    "matchedStatuses": ["skipped"]
+  },
+  {
+    "name": "Flaky Tests",
+    "description": "Tests that failed but passed on retry",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*flaky.*|.*intermittent.*"
+  }
+]
