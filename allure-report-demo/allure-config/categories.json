@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Product Defects",
+    "description": "Test failures caused by actual product bugs",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*Assert.*|.*Expected.*"
+  },
+  {
+    "name": "Test Environment Issues",
+    "description": "Failures caused by environment problems (timeouts, connectivity)",
+    "matchedStatuses": ["broken"],
+    "messageRegex": ".*Timeout.*|.*Connection.*|.*WebDriver.*|.*ERR_.*"
+  },
+  {
+    "name": "Known Issues",
+    "description": "Tests skipped due to known bugs or limitations",
+    "matchedStatuses": ["skipped"]
+  }
+]
