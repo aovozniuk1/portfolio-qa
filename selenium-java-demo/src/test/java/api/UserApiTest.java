@@ -67,12 +67,12 @@ public class UserApiTest extends ApiBaseTest {
                 .extract()
                 .as(UserData.class);
 
-        Assert.assertEquals(user.getId(), userId, "User ID should match");
-        Assert.assertNotNull(user.getEmail(), "Email should not be null");
-        Assert.assertNotNull(user.getName(), "Name should not be null");
-        Assert.assertNotNull(user.getUsername(), "Username should not be null");
-        Assert.assertNotNull(user.getAddress(), "Address should not be null");
-        Assert.assertNotNull(user.getCompany(), "Company should not be null");
+        Assert.assertEquals(user.id(), userId, "User ID should match");
+        Assert.assertNotNull(user.email(), "Email should not be null");
+        Assert.assertNotNull(user.name(), "Name should not be null");
+        Assert.assertNotNull(user.username(), "Username should not be null");
+        Assert.assertNotNull(user.address(), "Address should not be null");
+        Assert.assertNotNull(user.company(), "Company should not be null");
     }
 
     // ------------------------------------------------------------------ //
@@ -113,10 +113,10 @@ public class UserApiTest extends ApiBaseTest {
                 .extract()
                 .as(CreateUserResponse.class);
 
-        Assert.assertEquals(response.getName(), "John Doe", "Name should match");
-        Assert.assertEquals(response.getUsername(), "johndoe", "Username should match");
-        Assert.assertEquals(response.getEmail(), "john@example.com", "Email should match");
-        Assert.assertTrue(response.getId() > 0, "ID should be a positive integer");
+        Assert.assertEquals(response.name(), "John Doe", "Name should match");
+        Assert.assertEquals(response.username(), "johndoe", "Username should match");
+        Assert.assertEquals(response.email(), "john@example.com", "Email should match");
+        Assert.assertTrue(response.id() > 0, "ID should be a positive integer");
     }
 
     // ------------------------------------------------------------------ //

@@ -1,19 +1,22 @@
 package config;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
 
 /**
  * Thread-safe WebDriver factory using ThreadLocal for parallel execution support.
  * <p>
  * Each thread gets its own WebDriver instance, preventing conflicts during
- * parallel test execution with TestNG.
+ * parallel test execution with TestNG. Uses Selenium 4's built-in driver
+ * management (SeleniumManager) -- no third-party WebDriverManager needed.
  */
 public final class DriverFactory {
 
@@ -42,23 +45,32 @@ public final class DriverFactory {
      * Initialise a WebDriver based on configuration and store it in ThreadLocal.
      * <p>
      * Reads browser type, headless mode, and timeout settings from {@link ConfigReader}.
+     * When {@code selenium.grid.url} is set, a {@link RemoteWebDriver} is created
+     * to run tests against a Selenium Grid (e.g. via Docker Compose).
+     * <p>
+     * Local drivers rely on Selenium 4's built-in SeleniumManager for automatic
+     * browser driver resolution -- no manual setup or third-party libraries required.
      */
     public static void initDriver() {
         String browser = ConfigReader.getBrowser().toLowerCase();
+        String gridUrl = ConfigReader.get("selenium.grid.url", "");
+        boolean useGrid = !gridUrl.isEmpty();
         WebDriver driver;
 
         switch (browser) {
             case "firefox":
-                WebDriverManager.firefoxdriver().setup();
                 FirefoxOptions ffOptions = new FirefoxOptions();
                 if (ConfigReader.isHeadless()) {
                     ffOptions.addArguments("--headless");
                 }
-                driver = new FirefoxDriver(ffOptions);
+                if (useGrid) {
+                    driver = createRemoteDriver(gridUrl, ffOptions);
+                } else {
+                    driver = new FirefoxDriver(ffOptions);
+                }
                 break;
             case "chrome":
             default:
-                WebDriverManager.chromedriver().setup();
                 ChromeOptions chromeOptions = new ChromeOptions();
                 chromeOptions.addArguments("--no-sandbox");
                 chromeOptions.addArguments("--disable-dev-shm-usage");
@@ -66,7 +78,11 @@ public final class DriverFactory {
                 if (ConfigReader.isHeadless()) {
                     chromeOptions.addArguments("--headless=new");
                 }
-                driver = new ChromeDriver(chromeOptions);
+                if (useGrid) {
+                    driver = createRemoteDriver(gridUrl, chromeOptions);
+                } else {
+                    driver = new ChromeDriver(chromeOptions);
+                }
                 break;
         }
 
@@ -75,6 +91,23 @@ public final class DriverFactory {
         driver.manage().window().maximize();
 
         DRIVER_THREAD_LOCAL.set(driver);
+    }
+
+    /**
+     * Create a {@link RemoteWebDriver} pointing at the given Selenium Grid URL.
+     *
+     * @param gridUrl     the grid hub URL (e.g. {@code http://selenium-hub:4444})
+     * @param capabilities browser options / capabilities
+     * @return a new RemoteWebDriver instance
+     */
+    private static WebDriver createRemoteDriver(String gridUrl,
+                                                 org.openqa.selenium.Capabilities capabilities) {
+        try {
+            return new RemoteWebDriver(new URL(gridUrl), capabilities);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(
+                    "Invalid selenium.grid.url: " + gridUrl, e);
+        }
     }
 
     /**
