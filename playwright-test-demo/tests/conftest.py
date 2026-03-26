@@ -8,16 +8,12 @@ Allure screenshot attachment, and logging setup.
 
 import logging
 import os
-import sys
 from typing import Generator
-
-# Add project root to path so 'pages' package is importable from tests/
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import allure
 import pytest
 from dotenv import load_dotenv
-from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_playwright
+from playwright.sync_api import Browser, BrowserContext, Page, Playwright, Request, sync_playwright
 
 load_dotenv()
 
@@ -106,6 +102,31 @@ def page(context: BrowserContext, request: pytest.FixtureRequest) -> Generator[P
         _attach_allure_screenshot(pg, request.node.name)
 
     pg.close()
+
+
+# -- Network interception fixtures ---------------------------------------- #
+
+@pytest.fixture()
+def captured_requests(page: Page) -> list[dict[str, str]]:
+    """Provide a list that automatically collects all network requests on the page.
+
+    Each entry is a dict with keys: ``url``, ``method``, and ``resource_type``.
+    The listener is attached as soon as the fixture is created, so all requests
+    made after fixture injection (including ``page.goto()``) are recorded.
+    """
+    requests: list[dict[str, str]] = []
+
+    def _on_request(request: Request) -> None:
+        requests.append(
+            {
+                "url": request.url,
+                "method": request.method,
+                "resource_type": request.resource_type,
+            }
+        )
+
+    page.on("request", _on_request)
+    return requests
 
 
 # -- Hooks ---------------------------------------------------------------- #
