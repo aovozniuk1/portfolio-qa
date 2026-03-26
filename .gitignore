@@ -5,6 +5,7 @@ __pycache__/
 .venv/
 venv/
 .env
+.pytest_cache/
 
 # Java
 target/
@@ -24,5 +25,6 @@ Thumbs.db
 allure-results/
 allure-report/
 
-# Screenshots (generated during test runs)
+# Screenshots and traces (generated during test runs)
 screenshots/
+traces/
