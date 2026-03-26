@@ -21,14 +21,15 @@ Senior-level test automation frameworks demonstrating enterprise QA engineering 
 - **Test reliability** -- RetryAnalyzer for flaky tests, explicit/fluent waits, proper fixture scoping
 - **Custom listeners** -- TestNG TestListener with automatic screenshot capture and logging
 - **Tracing & debugging** -- Playwright tracing support for post-mortem test analysis
-- **CI-ready** -- structured for Jenkins / GitHub Actions integration with parallel execution support
+- **CI/CD** -- GitHub Actions pipeline with parallel jobs, Allure report generation and artifact upload
+- **Docker** -- Dockerfile and docker-compose.yml for containerized Selenium Grid execution; Playwright Dockerfile for CI
 
 ## Test Targets
 
 All tests run against public demo sites -- no infrastructure setup required:
 
 - **UI**: [https://the-internet.herokuapp.com](https://the-internet.herokuapp.com)
-- **API**: [https://reqres.in](https://reqres.in)
+- **API**: [https://jsonplaceholder.typicode.com](https://jsonplaceholder.typicode.com)
 
 ## Quick Start
 

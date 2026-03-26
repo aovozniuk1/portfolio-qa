@@ -1,0 +1,39 @@
+services:
+  selenium-hub:
+    image: selenium/hub:4.27.0
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+
+  chrome-node:
+    image: selenium/node-chrome:4.27.0
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+  firefox-node:
+    image: selenium/node-firefox:4.27.0
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+  tests:
+    build: .
+    depends_on:
+      - selenium-hub
+      - chrome-node
+      - firefox-node
+    environment:
+      - SELENIUM_GRID_URL=http://selenium-hub:4444
+    command: >
+      mvn clean test
+      -Dheadless=true
+      -Dbrowser=chrome
+      -Dselenium.grid.url=http://selenium-hub:4444

@@ -1,0 +1,118 @@
+# CI Status Badge:
+# ![CI](https://github.com/<OWNER>/portfolio-qa/actions/workflows/ci.yml/badge.svg)
+
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  selenium-tests:
+    name: Selenium + Java Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: selenium-java-demo
+
+    env:
+      HEADLESS: "true"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+          cache-dependency-path: selenium-java-demo/pom.xml
+
+      - name: Run tests with Maven
+        run: mvn clean test -B
+        continue-on-error: true
+
+      - name: Generate Allure report
+        if: always()
+        run: |
+          mvn allure:report -Dmaven.test.skip=true -B || true
+          # Fallback: use allure CLI if maven plugin is not configured
+          if [ ! -d "target/site/allure-maven-plugin" ]; then
+            curl -sL https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz | tar -xz
+            ./allure-2.27.0/bin/allure generate target/allure-results -o target/allure-report --clean
+          fi
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-allure-results
+          path: selenium-java-demo/target/allure-results
+          retention-days: 30
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-allure-report
+          path: |
+            selenium-java-demo/target/site/allure-maven-plugin
+            selenium-java-demo/target/allure-report
+          retention-days: 30
+
+  playwright-tests:
+    name: Playwright + Python Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: playwright-test-demo
+
+    env:
+      HEADLESS: "true"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: playwright-test-demo/requirements.txt
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: playwright install --with-deps chromium
+
+      - name: Run tests with Pytest
+        run: pytest tests/ -v --alluredir=allure-results
+        continue-on-error: true
+
+      - name: Generate Allure report
+        if: always()
+        run: |
+          curl -sL https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz | tar -xz
+          ./allure-2.27.0/bin/allure generate allure-results -o allure-report --clean
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-allure-results
+          path: playwright-test-demo/allure-results
+          retention-days: 30
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-allure-report
+          path: playwright-test-demo/allure-report
+          retention-days: 30
