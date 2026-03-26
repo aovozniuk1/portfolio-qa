@@ -10,6 +10,7 @@ import logging
 import os
 from typing import List
 
+import allure
 from playwright.sync_api import Locator, Page, expect
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class BasePage:
     #  Navigation
     # ------------------------------------------------------------------ #
 
+    @allure.step("Navigate to {path}")
     def navigate(self, path: str = "/") -> None:
         """Navigate to a path relative to the base URL.
 
@@ -48,6 +50,7 @@ class BasePage:
         """Return the current page title."""
         return self.page.title()
 
+    @allure.step("Reload page")
     def reload(self) -> None:
         """Reload the current page."""
         logger.info("Reloading page")
@@ -57,6 +60,7 @@ class BasePage:
     #  Element interaction
     # ------------------------------------------------------------------ #
 
+    @allure.step("Click element: {selector}")
     def click(self, selector: str, timeout: float | None = None) -> None:
         """Click an element.
 
@@ -67,6 +71,7 @@ class BasePage:
         logger.debug("Clicking '%s'", selector)
         self.page.click(selector, timeout=timeout or self._default_timeout)
 
+    @allure.step("Fill '{selector}' with '{value}'")
     def fill(self, selector: str, value: str) -> None:
         """Clear and fill an input field.
 
@@ -77,6 +82,7 @@ class BasePage:
         logger.debug("Filling '%s' with '%s'", selector, value)
         self.page.fill(selector, value)
 
+    @allure.step("Select option in '{selector}'")
     def select_option(self, selector: str, *, value: str | None = None,
                       label: str | None = None) -> None:
         """Select a dropdown option by value or visible label.
@@ -93,6 +99,7 @@ class BasePage:
             logger.debug("Selecting label='%s' in '%s'", label, selector)
             self.page.select_option(selector, label=label)
 
+    @allure.step("Check checkbox: {selector}")
     def check(self, selector: str) -> None:
         """Check a checkbox if it is not already checked.
 
@@ -101,6 +108,7 @@ class BasePage:
         """
         self.page.check(selector)
 
+    @allure.step("Uncheck checkbox: {selector}")
     def uncheck(self, selector: str) -> None:
         """Uncheck a checkbox if it is currently checked.
 
@@ -207,6 +215,7 @@ class BasePage:
         """
         return self.page.locator(selector).is_checked()
 
+    @allure.step("Wait for element '{selector}' to be {state}")
     def wait_for_element(self, selector: str, *,
                          state: str = "visible",
                          timeout: float | None = None) -> Locator:
@@ -224,6 +233,7 @@ class BasePage:
         locator.wait_for(state=state, timeout=timeout or self._default_timeout)
         return locator
 
+    @allure.step("Wait for URL matching '{url_pattern}'")
     def wait_for_url(self, url_pattern: str, timeout: float | None = None) -> None:
         """Wait until the page URL matches the pattern.
 
@@ -237,6 +247,7 @@ class BasePage:
     #  Scroll helpers
     # ------------------------------------------------------------------ #
 
+    @allure.step("Scroll to element: {selector}")
     def scroll_to(self, selector: str) -> None:
         """Scroll an element into the viewport.
 
@@ -254,6 +265,7 @@ class BasePage:
     #  Screenshot
     # ------------------------------------------------------------------ #
 
+    @allure.step("Take screenshot: {name}")
     def take_screenshot(self, name: str = "screenshot",
                         directory: str = "screenshots") -> str:
         """Capture a full-page screenshot and return the file path.
@@ -275,6 +287,7 @@ class BasePage:
     #  Assertions (Playwright expect wrappers)
     # ------------------------------------------------------------------ #
 
+    @allure.step("Assert element visible: {selector}")
     def expect_visible(self, selector: str) -> None:
         """Assert that an element is visible.
 
@@ -283,6 +296,7 @@ class BasePage:
         """
         expect(self.page.locator(selector)).to_be_visible()
 
+    @allure.step("Assert element hidden: {selector}")
     def expect_hidden(self, selector: str) -> None:
         """Assert that an element is hidden.
 
@@ -291,6 +305,7 @@ class BasePage:
         """
         expect(self.page.locator(selector)).to_be_hidden()
 
+    @allure.step("Assert element text contains '{expected}': {selector}")
     def expect_text(self, selector: str, expected: str) -> None:
         """Assert that an element contains expected text.
 
@@ -300,6 +315,7 @@ class BasePage:
         """
         expect(self.page.locator(selector)).to_contain_text(expected)
 
+    @allure.step("Assert element count is {count}: {selector}")
     def expect_element_count(self, selector: str, count: int) -> None:
         """Assert the number of elements matching the selector.
 
