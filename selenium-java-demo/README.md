@@ -8,7 +8,6 @@ Enterprise-grade test automation framework built with **Selenium WebDriver 4**, 
 - **TestNG** -- test framework with groups, DataProvider, parallel execution, and custom listeners
 - **RestAssured** -- fluent REST API testing with POJO deserialization and JSON schema validation
 - **Allure** -- rich HTML test reporting with @Step, @Severity, @Feature annotations
-- **WebDriverManager** -- automatic browser driver management
 - **Jackson** -- JSON serialisation / deserialisation for API request/response POJOs
 
 ## Architecture Highlights
@@ -63,8 +62,8 @@ src/test/resources/
 
 ## Prerequisites
 
-- Java 11+
-- Maven 3.6+
+- Java 17+
+- Maven 3.8+
 - Chrome browser (for UI tests)
 
 ## Running Tests
@@ -102,12 +101,24 @@ Properties in `src/test/resources/config.properties` can be overridden via syste
 | Property             | Default                                    | Description               |
 |----------------------|--------------------------------------------|---------------------------|
 | `base.url`           | `https://the-internet.herokuapp.com`       | UI test target URL        |
-| `api.base.url`       | `https://reqres.in/api`                    | API test base URI         |
+| `api.base.url`       | `https://jsonplaceholder.typicode.com`     | API test base URI         |
 | `browser`            | `chrome`                                   | Browser (chrome, firefox) |
 | `headless`           | `true`                                     | Headless mode             |
 | `explicit.wait`      | `10`                                       | Explicit wait (seconds)   |
 | `page.load.timeout`  | `30`                                       | Page load timeout (s)     |
-| `retry.count`        | `1`                                        | Retry failed tests        |
+| `retry.count`        | `2`                                        | Retry failed tests        |
+
+## Docker (Selenium Grid)
+
+Run tests against a containerized Selenium Grid with Chrome and Firefox nodes:
+
+```bash
+# Start Selenium Grid + run tests
+docker-compose up --build
+
+# Run against specific browser
+docker-compose run tests mvn clean test -Dbrowser=firefox -Dselenium.grid.url=http://selenium-hub:4444
+```
 
 ## Allure Report Categories
 
