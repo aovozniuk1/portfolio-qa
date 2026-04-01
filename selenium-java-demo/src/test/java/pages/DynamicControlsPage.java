@@ -45,6 +45,8 @@ public class DynamicControlsPage extends BasePage {
             // loading may have already appeared and disappeared
         }
         waitForInvisible(LOADING);
+        // Also wait for the message to appear confirming the operation is done
+        waitForVisible(MESSAGE);
         return this;
     }
 
@@ -74,5 +76,14 @@ public class DynamicControlsPage extends BasePage {
 
     public String getMessage() {
         return getText(MESSAGE).trim();
+    }
+
+    /**
+     * Get the current value of the text input field.
+     *
+     * @return the input field value
+     */
+    public String getInputValue() {
+        return getAttribute(TEXT_INPUT, "value");
     }
 }
