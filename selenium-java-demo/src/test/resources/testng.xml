@@ -1,5 +1,5 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
-<suite name="Selenium Demo Suite" parallel="methods" thread-count="3" verbose="2">
+<suite name="Selenium Demo Suite" parallel="methods" thread-count="2" verbose="2">
 
     <listeners>
         <listener class-name="utils.TestListener"/>
@@ -15,6 +15,12 @@
             <class name="tests.LoginTest"/>
             <class name="tests.DynamicControlsTest"/>
             <class name="tests.DropdownTest"/>
+            <class name="tests.TablesTest"/>
+            <class name="tests.JavaScriptAlertsTest"/>
+            <class name="tests.IframeTest"/>
+            <class name="tests.HoversTest"/>
+            <class name="tests.WindowsTest"/>
+            <class name="tests.FileUploadTest"/>
         </classes>
     </test>
 
@@ -28,6 +34,12 @@
             <class name="tests.LoginTest"/>
             <class name="tests.DynamicControlsTest"/>
             <class name="tests.DropdownTest"/>
+            <class name="tests.TablesTest"/>
+            <class name="tests.JavaScriptAlertsTest"/>
+            <class name="tests.IframeTest"/>
+            <class name="tests.HoversTest"/>
+            <class name="tests.WindowsTest"/>
+            <class name="tests.FileUploadTest"/>
         </classes>
     </test>
 
