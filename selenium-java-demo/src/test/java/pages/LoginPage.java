@@ -76,4 +76,16 @@ public class LoginPage extends BasePage {
     public String getPageHeading() {
         return getText(PAGE_HEADING).trim();
     }
+
+    public boolean isUsernameFieldDisplayed() {
+        return isDisplayed(USERNAME_FIELD);
+    }
+
+    public boolean isPasswordFieldDisplayed() {
+        return isDisplayed(PASSWORD_FIELD);
+    }
+
+    public boolean isLoginButtonDisplayed() {
+        return isDisplayed(LOGIN_BUTTON);
+    }
 }
