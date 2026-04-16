@@ -1,0 +1,96 @@
+plugins {
+    id 'java'
+    id 'io.qameta.allure' version '2.11.2'
+}
+
+group = 'com.portfolio'
+version = '1.0'
+description = 'Selenium 4 + TestNG/JUnit5/Cucumber + AssertJ + Allure'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    seleniumVersion   = '4.27.0'
+    testngVersion     = '7.10.2'
+    junitVersion      = '5.11.4'
+    cucumberVersion   = '7.20.1'
+    restassuredVersion= '5.5.0'
+    allureVersion     = '2.29.1'
+    aspectjVersion    = '1.9.22.1'
+    jacksonVersion    = '2.18.2'
+    assertjVersion    = '3.26.3'
+    lombokVersion     = '1.18.34'
+}
+
+dependencies {
+    implementation "org.seleniumhq.selenium:selenium-java:${seleniumVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation 'org.slf4j:slf4j-simple:2.0.16'
+
+    compileOnly   "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    testImplementation "org.testng:testng:${testngVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
+    testImplementation "io.cucumber:cucumber-testng:${cucumberVersion}"
+    testImplementation "io.rest-assured:rest-assured:${restassuredVersion}"
+    testImplementation "io.rest-assured:json-schema-validator:${restassuredVersion}"
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+
+    testImplementation "io.qameta.allure:allure-testng:${allureVersion}"
+    testImplementation "io.qameta.allure:allure-junit5:${allureVersion}"
+    testImplementation "io.qameta.allure:allure-cucumber7-jvm:${allureVersion}"
+    testImplementation "io.qameta.allure:allure-rest-assured:${allureVersion}"
+
+    testImplementation "org.aspectj:aspectjweaver:${aspectjVersion}"
+    testCompileOnly   "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+def aspectjAgent() {
+    def configuration = configurations.testRuntimeClasspath
+    def aspectjJar = configuration.files.find { it.name.startsWith('aspectjweaver') }
+    return aspectjJar ? "-javaagent:${aspectjJar.absolutePath}" : null
+}
+
+test {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+    }
+    systemProperties System.properties.findAll { k, _ -> k.toString() =~ /^(browser|headless|groups|selenium|base|api).*/ }
+    def agent = aspectjAgent()
+    if (agent) jvmArgs agent
+}
+
+tasks.register('junitTest', Test) {
+    description = 'Run the JUnit 5 login suite.'
+    group = 'verification'
+    useJUnitPlatform()
+    include '**/junit/*Test.class'
+    def agent = aspectjAgent()
+    if (agent) jvmArgs agent
+}
+
+tasks.register('bddTest', Test) {
+    description = 'Run the Cucumber BDD suite.'
+    group = 'verification'
+    useTestNG()
+    include '**/bdd/CucumberRunner.class'
+    def agent = aspectjAgent()
+    if (agent) jvmArgs agent
+}
+
+allure {
+    version = allureVersion
+    useTestNG {
+        version = allureVersion
+    }
+}
