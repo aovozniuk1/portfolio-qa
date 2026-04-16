@@ -38,16 +38,27 @@ public class DynamicControlsPage extends BasePage {
 
     @Step("Wait for loading to finish")
     public DynamicControlsPage waitForLoading() {
-        // The loading indicator blinks for ~2s. It may already be gone by the
-        // time we look, so we only log a timeout here and fall through to the
-        // disappearance wait + final message wait.
+        // The loading spinner blinks briefly; try to catch it with a fluent
+        // wait, but fall through if it's already gone.
         try {
             fluentWait(LOADING, 3, 200);
-        } catch (org.openqa.selenium.TimeoutException e) {
-            // loading appears and disappears quickly on fast machines
+        } catch (org.openqa.selenium.TimeoutException ignored) {
+            // loading already completed -- not a failure
         }
         waitForInvisible(LOADING);
         waitForVisible(MESSAGE);
+        return this;
+    }
+
+    /**
+     * Wait for the {@code message} element to contain an expected string.
+     * Use this after {@link #waitForLoading()} when the previous operation
+     * left its own message on the page (the element is always visible once
+     * the first action has run).
+     */
+    @Step("Wait for message to contain '{expected}'")
+    public DynamicControlsPage waitForMessage(String expected) {
+        wait.until(d -> getText(MESSAGE).contains(expected));
         return this;
     }
 

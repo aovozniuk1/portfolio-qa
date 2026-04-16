@@ -54,6 +54,10 @@ public class LoginPage extends BasePage {
         enterUsername(username);
         enterPassword(password);
         clickLogin();
+        // Wait for the form submission to settle. The flash banner is present
+        // on both success and failure, so this works for positive + negative
+        // paths without forcing callers to add their own wait.
+        waitForVisible(FLASH_MESSAGE);
         return this;
     }
 

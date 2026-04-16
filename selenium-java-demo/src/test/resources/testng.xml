@@ -46,6 +46,14 @@
     <test name="API Tests">
         <classes>
             <class name="api.UserApiTest"/>
+            <class name="api.PostApiTest"/>
+        </classes>
+    </test>
+
+    <test name="CDP Tests">
+        <parameter name="chrome.only" value="true"/>
+        <classes>
+            <class name="cdp.CdpNetworkTest"/>
         </classes>
     </test>
 

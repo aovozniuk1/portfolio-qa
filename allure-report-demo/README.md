@@ -88,15 +88,17 @@ mvn allure:report
 - **Categories** -- failure classification (product defects vs. test environment issues)
 - **Graphs** -- severity distribution, duration trends, retry statistics
 
-## Adding Report Screenshots
+## Sample screenshots
 
-1. Run the test suite with Allure enabled
-2. Generate the report: `allure serve allure-results/`
-3. Take screenshots of the key dashboard sections
-4. Save them in this directory with descriptive names:
-   - `01-overview-dashboard.png`
-   - `02-test-suites.png`
-   - `03-timeline.png`
-   - `04-test-steps-detail.png`
-   - `05-failure-screenshot.png`
-   - `06-categories-view.png`
+`screenshots/` contains report captures from a recent run so reviewers
+can see what the report looks like without running the suite locally:
+
+| File | What it shows |
+|---|---|
+| `01-overview-dashboard.png` | Top-level pass/fail breakdown with pie charts |
+| `02-test-suites.png` | Tests grouped by `@Feature` and `@Story` |
+| `03-timeline.png` | Parallel-execution timeline for all workers |
+| `04-graphs.png` | Severity, duration, and retry distributions |
+| `05-categories.png` | Failures split by category (product bugs vs. env) |
+| `06-behaviors.png` | BDD-style view (Feature → Story → Scenario) |
+| `07-test-detail.png` | A single test with its `@Step` log + attachment |

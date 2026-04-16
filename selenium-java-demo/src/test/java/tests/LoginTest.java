@@ -113,7 +113,10 @@ public class LoginTest extends BaseTest {
         Assert.assertFalse(loginPage.isLoggedIn(),
                 "Should be logged out");
 
-        // Login again
+        // Login again. Re-open the page first so we bind to fresh form
+        // elements -- depending on browser/driver the post-logout redirect
+        // can leave stale references to the previous page's inputs.
+        loginPage.open();
         loginPage.login("tomsmith", "SuperSecretPassword!");
         Assert.assertTrue(secureAreaPage.isLogoutVisible(),
                 "Should be logged in after second login");
