@@ -1,10 +1,34 @@
-"""
-Test data classes and constants used across test modules.
-
-Centralises test data so changes propagate to all tests automatically.
-"""
+"""Test-data containers, constants, and Faker-driven factories."""
 
 from dataclasses import dataclass
+
+from faker import Faker
+
+# Seeded so test reports stay reproducible. Drop the seed() call when
+# you want fresh data on every run.
+_faker = Faker()
+Faker.seed(4242)
+
+
+def random_login_payload() -> "LoginCredentials":
+    """Return invalid but plausible login credentials for negative tests."""
+    return LoginCredentials(
+        username=_faker.user_name(),
+        password=_faker.password(length=12, special_chars=True),
+        expected_success=False,
+        description="Faker-generated invalid user",
+    )
+
+
+def random_user_profile() -> dict:
+    """Return a synthetic user profile (for API test bodies, form fills, etc.)."""
+    return {
+        "name": _faker.name(),
+        "email": _faker.safe_email(),
+        "phone": _faker.phone_number(),
+        "company": _faker.company(),
+        "city": _faker.city(),
+    }
 
 
 @dataclass(frozen=True)
