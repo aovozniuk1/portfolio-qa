@@ -1,130 +1,120 @@
 # Selenium Java Demo
 
-Enterprise-grade test automation framework built with **Selenium WebDriver 4**, **TestNG**, **RestAssured**, and **Allure**.
+UI + API test framework in Java. Runs under TestNG by default, with a
+parallel JUnit 5 suite and a Cucumber BDD runner; builds with Maven or
+Gradle. Target app: [the-internet.herokuapp.com](https://the-internet.herokuapp.com);
+API target: [jsonplaceholder.typicode.com](https://jsonplaceholder.typicode.com).
 
-## Tech Stack
+## Tech stack
 
-- **Selenium WebDriver 4** -- browser automation with thread-safe DriverFactory
-- **TestNG** -- test framework with groups, DataProvider, parallel execution, and custom listeners
-- **RestAssured** -- fluent REST API testing with POJO deserialization and JSON schema validation
-- **Allure** -- rich HTML test reporting with @Step, @Severity, @Feature annotations
-- **Jackson** -- JSON serialisation / deserialisation for API request/response POJOs
+- Java 17, records for API DTOs
+- Selenium WebDriver 4 (Selenium Manager — no WebDriverManager needed)
+- TestNG (primary) + JUnit 5 (secondary suite under `src/test/java/junit`)
+- Cucumber-JVM 7 for a small BDD layer
+- RestAssured for REST tests, with Jackson + JSON schema validation
+- AssertJ for readable assertions
+- Lombok on select DTOs (records are used where possible)
+- Allure: `@Step`, `@Feature`, `@Severity`, environment + categories
+- SLF4J logging
+- Maven or Gradle (both build files commit'd; CI runs Maven)
 
-## Architecture Highlights
+## Architecture
 
-- **DriverFactory** -- ThreadLocal-based WebDriver management for parallel-safe execution
-- **ConfigManager** -- Singleton properties reader with system-property overrides (`-Dkey=value`)
-- **RetryAnalyzer** -- Configurable retry mechanism for flaky test handling
-- **TestListener** -- Custom TestNG listener with automatic screenshot capture on failure
-- **BasePage** -- Abstract base with explicit waits, fluent waits, JS helpers, and @Step annotations
-- **POJO Models** -- Type-safe API response deserialization (UserData, UserResponse, CreateUserRequest/Response)
-- **JSON Schema Validation** -- API response structure validation against JSON schema files
+- `DriverFactory` — ThreadLocal WebDriver, supports local + RemoteWebDriver (Selenium Grid)
+- `ConfigReader` — singleton properties + `-Dkey=value` overrides
+- `BasePage` — explicit/fluent waits, JS helpers, screenshot helpers, `@Step`s
+- `RetryAnalyzer` — configurable TestNG retries
+- `TestListener` — screenshot-on-failure, log attachment to Allure
+- `CdpTest` — Chrome DevTools Protocol example (network log capture)
+- `JsonPlaceholderApiTest` — RestAssured + AssertJ + schema validation
 
-## Project Structure
+## Layout
 
 ```
-src/test/java/
+src/main/java/
   config/
-    ConfigReader.java          # Singleton properties reader with system-property overrides
-    DriverFactory.java         # ThreadLocal WebDriver factory for parallel execution
-  pages/
-    BasePage.java              # Abstract base: waits, JS helpers, screenshots, @Step
-    LoginPage.java             # /login page object
-    SecureAreaPage.java        # /secure page object
-    DynamicControlsPage.java   # /dynamic_controls page object
-    DropdownPage.java          # /dropdown page object with Select support
-  tests/
-    BaseTest.java              # DriverFactory setup/teardown, screenshot on failure
-    LoginTest.java             # Login tests (valid, logout, DataProvider negatives)
-    DynamicControlsTest.java   # Checkbox remove/add, input enable tests
-    DropdownTest.java          # Dropdown selection tests with DataProvider
-  api/
-    ApiBaseTest.java           # RestAssured specs with Allure filter
-    UserApiTest.java           # CRUD + POJO deserialization + schema validation + register
-    models/
-      UserData.java            # POJO for user data object
-      UserResponse.java        # POJO for single-user API response
-      CreateUserRequest.java   # POJO for POST /users request body
-      CreateUserResponse.java  # POJO for POST /users response body
+    ConfigReader.java
+    DriverFactory.java
+  pages/                       # shared BasePage + page objects
+src/test/java/
+  tests/                       # TestNG tests (UI)
+  api/                         # RestAssured + schema validation
+  junit/                       # JUnit 5 suite (mirrors the core login + dropdown flows)
+  bdd/
+    CucumberRunner.java        # JUnit-runner for Cucumber
+    steps/                     # step definitions
+  cdp/
+    CdpNetworkTest.java        # Selenium 4 CDP example
   utils/
-    RetryAnalyzer.java         # TestNG retry for flaky tests (configurable count)
-    TestListener.java          # Custom TestNG listener with Allure screenshot on failure
-    AllureUtils.java           # Screenshot & text attachment helpers
 src/test/resources/
-  config.properties            # Base URL, browser, timeouts, retry config
-  testng.xml                   # Suite with smoke/regression groups and parallel support
-  allure.properties            # Allure results directory and link patterns
-  categories.json              # Allure failure categorization
-  schemas/
-    single-user-schema.json    # JSON schema for GET /users/{id}
-    users-list-schema.json     # JSON schema for GET /users?page={n}
+  config.properties
+  testng.xml
+  junit-platform.properties
+  allure.properties
+  categories.json
+  environment.properties
+  features/                    # .feature files
+  schemas/                     # JSON schema files
 ```
 
 ## Prerequisites
 
 - Java 17+
-- Maven 3.8+
-- Chrome browser (for UI tests)
+- Maven 3.8+ (or Gradle 8+; `gradlew` is included)
+- Chrome (for local UI runs)
 
-## Running Tests
+## Run
+
+### TestNG suite (Maven)
 
 ```bash
-# All tests via testng.xml
 mvn clean test
-
-# Headed mode
 mvn clean test -Dheadless=false
-
-# Smoke tests only
 mvn clean test -Dgroups=smoke
-
-# API tests only
 mvn clean test -Dgroups=api
-
-# Regression tests only
-mvn clean test -Dgroups=regression
-
-# Run with Firefox
 mvn clean test -Dbrowser=firefox
-
-# Parallel execution (configured in testng.xml)
-mvn clean test -Dparallel=methods -DthreadCount=3
-
-# Generate Allure report
-mvn allure:serve
+mvn clean test -Dparallel=methods -DthreadCount=4
 ```
 
-## Configuration
-
-Properties in `src/test/resources/config.properties` can be overridden via system properties (`-Dkey=value`):
-
-| Property             | Default                                    | Description               |
-|----------------------|--------------------------------------------|---------------------------|
-| `base.url`           | `https://the-internet.herokuapp.com`       | UI test target URL        |
-| `api.base.url`       | `https://jsonplaceholder.typicode.com`     | API test base URI         |
-| `browser`            | `chrome`                                   | Browser (chrome, firefox) |
-| `headless`           | `true`                                     | Headless mode             |
-| `explicit.wait`      | `10`                                       | Explicit wait (seconds)   |
-| `page.load.timeout`  | `30`                                       | Page load timeout (s)     |
-| `retry.count`        | `2`                                        | Retry failed tests        |
-
-## Docker (Selenium Grid)
-
-Run tests against a containerized Selenium Grid with Chrome and Firefox nodes:
+### Same, via Gradle
 
 ```bash
-# Start Selenium Grid + run tests
-docker-compose up --build
-
-# Run against specific browser
-docker-compose run tests mvn clean test -Dbrowser=firefox -Dselenium.grid.url=http://selenium-hub:4444
+./gradlew test
+./gradlew test -Dgroups=smoke
+./gradlew bddTest            # Cucumber runner
+./gradlew junitTest          # JUnit 5 suite
 ```
 
-## Allure Report Categories
+### Selenium Grid (Docker)
 
-The `categories.json` file classifies test failures into:
+```bash
+docker compose up -d         # hub + chrome + firefox nodes
+mvn clean test -Dselenium.grid.url=http://localhost:4444
+```
 
-- **Product Defects** -- assertion failures indicating real bugs
-- **Test Environment Issues** -- timeouts, connectivity, WebDriver problems
-- **Known Issues** -- skipped tests due to known limitations
-- **Flaky Tests** -- intermittent failures
+### Allure report
+
+```bash
+mvn allure:serve
+# or: ./gradlew allureServe
+```
+
+## Config
+
+`src/test/resources/config.properties` — override any value with `-Dkey=value`:
+
+| Property | Default | |
+|---|---|---|
+| `base.url` | the-internet.herokuapp.com | UI target |
+| `api.base.url` | jsonplaceholder.typicode.com | API target |
+| `browser` | chrome | chrome / firefox |
+| `headless` | true | |
+| `explicit.wait` | 10 | seconds |
+| `page.load.timeout` | 30 | seconds |
+| `retry.count` | 2 | TestNG retries for flaky tests |
+| `selenium.grid.url` | — | if set, uses RemoteWebDriver |
+
+## Notes
+
+- `allure-report-demo/` in the repo root holds sample screenshots of the generated report for reviewers who can't run the suite locally.
+- If you see `chromedriver` version errors on a very recent Chrome, bump Selenium to `4.28+`; Selenium Manager auto-resolves driver versions once it knows about the new Chrome.

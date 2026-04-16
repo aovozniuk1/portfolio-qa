@@ -1,63 +1,70 @@
 # QA Automation Portfolio
 
-Senior-level test automation frameworks demonstrating enterprise QA engineering practices across multiple languages, tools, and testing paradigms.
+Two test frameworks and a small Allure sample. Built as a showcase of
+everything I reach for on a normal QA automation project — page objects,
+API + UI, cross-browser, BDD, parallel execution, CI, Docker Grid,
+reporting — without the padding.
 
 ## Projects
 
-| Project | Stack | Description |
-|---------|-------|-------------|
-| [playwright-test-demo](playwright-test-demo/) | Python, Playwright, Pytest | E2E framework with Page Object Model, 15+ data-driven tests, Allure reporting, tracing support |
-| [selenium-java-demo](selenium-java-demo/) | Java, Selenium 4, TestNG, RestAssured | UI + API framework with DriverFactory, POJO deserialization, JSON schema validation, parallel execution |
-| [allure-report-demo](allure-report-demo/) | Allure | Report configuration, categories, environment setup, and sample screenshots |
+| Project | Stack | |
+|---|---|---|
+| [playwright-test-demo](playwright-test-demo/) | Python, Playwright, Pytest, httpx, Pydantic, pytest-bdd, pytest-xdist, Faker | UI + API + BDD. Runs on chromium/firefox/webkit. |
+| [selenium-java-demo](selenium-java-demo/) | Java 17, Selenium 4, TestNG + JUnit 5, Cucumber, RestAssured, AssertJ, Lombok | UI + API + BDD + CDP. Maven or Gradle. |
+| [allure-report-demo](allure-report-demo/) | Allure | Sample report screenshots for quick review without running the suite. |
 
-## Skills Demonstrated
+## Skills demonstrated
 
-- **Page Object Model** -- BasePage with reusable methods, clean separation of concerns, fluent API
-- **Thread-safe WebDriver management** -- DriverFactory with ThreadLocal for parallel test execution
-- **Data-driven testing** -- pytest parametrize (Python), TestNG DataProvider (Java), external test data
-- **API testing** -- RestAssured with POJO deserialization, JSON schema validation, chained requests
-- **Reporting** -- Allure integration with @Step, @Feature, @Severity annotations, failure categorization
-- **Configuration management** -- .env / config.properties with environment overrides
-- **Test reliability** -- RetryAnalyzer for flaky tests, explicit/fluent waits, proper fixture scoping
-- **Custom listeners** -- TestNG TestListener with automatic screenshot capture and logging
-- **Tracing & debugging** -- Playwright tracing support for post-mortem test analysis
-- **CI/CD** -- GitHub Actions pipeline with parallel jobs, Allure report generation and artifact upload
-- **Docker** -- Dockerfile and docker-compose.yml for containerized Selenium Grid execution; Playwright Dockerfile for CI
+- Page Object Model with a shared `BasePage` (waits, JS helpers, screenshots)
+- Thread-safe WebDriver via `ThreadLocal` `DriverFactory`; RemoteWebDriver for Selenium Grid
+- Parallel execution: TestNG (`parallel=methods`), JUnit 5, `pytest-xdist -n auto`
+- Cross-browser Playwright (chromium / firefox / webkit); Chrome + Firefox nodes in the Selenium Grid
+- Data-driven: `@DataProvider`, `@ParameterizedTest`, `pytest.mark.parametrize`, Faker-driven fixtures
+- BDD: Cucumber-JVM (Java) and pytest-bdd (Python) — feature files + step defs
+- API: RestAssured + AssertJ + JSON-schema validation (Java); httpx + Pydantic models (Python)
+- Chrome DevTools Protocol: Selenium 4 CDP example capturing network events
+- Reporting: Allure with `@Step / @Feature / @Severity`, environment + categories, screenshots on failure
+- Retry of flaky tests: `RetryAnalyzer` (TestNG), `flaky` pytest marker
+- Docker: `docker-compose` for Selenium Grid (hub + chrome + firefox nodes)
+- BrowserStack hookup: Playwright CDP connection via env vars
+- HTTP proxy support: `HTTP_PROXY` routes traffic through Charles / mitmproxy / Fiddler
+- CI: GitHub Actions — matrix on JDK 17/21, matrix on chromium/firefox/webkit, Allure artifacts
 
-## Test Targets
+## Test targets
 
-All tests run against public demo sites -- no infrastructure setup required:
+Everything points at free public endpoints so a reviewer can clone and run with no setup:
 
-- **UI**: [https://the-internet.herokuapp.com](https://the-internet.herokuapp.com)
-- **API**: [https://jsonplaceholder.typicode.com](https://jsonplaceholder.typicode.com)
+- UI: [the-internet.herokuapp.com](https://the-internet.herokuapp.com)
+- API: [jsonplaceholder.typicode.com](https://jsonplaceholder.typicode.com)
 
-## Quick Start
-
-Each project has its own README with detailed setup and execution instructions.
+## Quick start
 
 ### Playwright (Python)
 
 ```bash
 cd playwright-test-demo
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate           # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-playwright install chromium
-pytest tests/ -v
+python -m playwright install chromium
+pytest tests/ -v                    # or: pytest tests/ -n auto --browser=firefox
 ```
 
 ### Selenium (Java)
 
 ```bash
 cd selenium-java-demo
-mvn clean test
+mvn clean test                      # TestNG
 mvn allure:serve
+# or via Gradle:
+./gradlew test
 ```
 
-## Test Coverage
+## Notes for reviewers
 
-| Framework  | UI Tests | API Tests | Total |
-|------------|----------|-----------|-------|
-| Playwright | 24       | --        | 24    |
-| Selenium   | 10       | 12        | 22    |
-| **Total**  | **34**   | **12**    | **46**|
+- `playwright-test-demo/tests/api/` runs without a browser — useful for a
+  "does anything work?" smoke run on a fresh clone.
+- `allure-report-demo/screenshots/` has four Allure report screens (suite
+  overview, timeline, a test detail with step log, categories) if you'd
+  rather not build locally.
+- Selenium Grid is optional; pass `-Dselenium.grid.url=...` to switch.

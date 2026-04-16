@@ -38,14 +38,15 @@ public class DynamicControlsPage extends BasePage {
 
     @Step("Wait for loading to finish")
     public DynamicControlsPage waitForLoading() {
-        // wait for loading to appear then disappear
+        // The loading indicator blinks for ~2s. It may already be gone by the
+        // time we look, so we only log a timeout here and fall through to the
+        // disappearance wait + final message wait.
         try {
-            waitForVisible(LOADING);
-        } catch (Exception ignored) {
-            // loading may have already appeared and disappeared
+            fluentWait(LOADING, 3, 200);
+        } catch (org.openqa.selenium.TimeoutException e) {
+            // loading appears and disappears quickly on fast machines
         }
         waitForInvisible(LOADING);
-        // Also wait for the message to appear confirming the operation is done
         waitForVisible(MESSAGE);
         return this;
     }

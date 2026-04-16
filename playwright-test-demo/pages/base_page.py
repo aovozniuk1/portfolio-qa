@@ -1,9 +1,7 @@
-"""
-BasePage -- Comprehensive base class for all page objects.
+"""Shared utilities every page object can rely on.
 
-Provides reusable methods for navigation, element interaction,
-waiting strategies, scrolling, screenshots, and assertions.
-All page objects inherit from this class.
+Keeps navigation, waiting, and common interactions in one place so
+individual page objects stay focused on page-specific behaviour.
 """
 
 import logging
@@ -215,19 +213,13 @@ class BasePage:
         """
         return self.page.locator(selector).is_checked()
 
-    @allure.step("Wait for element '{selector}' to be {state}")
+    @allure.step("Wait for element '{selector}'")
     def wait_for_element(self, selector: str, *,
                          state: str = "visible",
                          timeout: float | None = None) -> Locator:
         """Wait for an element to reach the given state.
 
-        Args:
-            selector: CSS / Playwright selector.
-            state: Target state -- ``visible``, ``hidden``, ``attached``, ``detached``.
-            timeout: Maximum wait time in ms.
-
-        Returns:
-            The located element.
+        state: visible | hidden | attached | detached.
         """
         locator = self.page.locator(selector)
         locator.wait_for(state=state, timeout=timeout or self._default_timeout)

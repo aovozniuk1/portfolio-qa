@@ -1,110 +1,124 @@
 # Playwright Test Demo
 
-Enterprise-grade end-to-end test automation framework built with **Python**, **Playwright**, and **Pytest**.
+End-to-end UI and API tests written in Python with Playwright + Pytest.
+Target application: [the-internet.herokuapp.com](https://the-internet.herokuapp.com)
+(public demo site, no auth or setup required).
 
-All tests target the public demo site [https://the-internet.herokuapp.com](https://the-internet.herokuapp.com).
+## What's in here
 
-## Key Features
+- Page objects with a shared `BasePage` (waits, clicks, assertions, screenshots)
+- Login, dropdowns, dynamic controls, checkboxes, hovers, file upload, and network-interception tests
+- Data-driven tests via `pytest.mark.parametrize` and a BDD feature file via `pytest-bdd`
+- API tests using `httpx` with Pydantic response models
+- Parallel execution via `pytest-xdist` (`-n auto`)
+- Cross-browser: Chromium, Firefox, WebKit (selectable via `--browser=...`)
+- BrowserStack-ready: set `BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`
+- Proxy support (Charles, mitmproxy, Fiddler) via `HTTP_PROXY` env var
+- Screenshot on failure (attached to Allure report)
+- Playwright tracing (`TRACING=true`) saved per-test under `traces/`
+- Allure reporting with `@allure.feature/story/title/severity`
+- `Faker` for realistic test data
 
-- **Page Object Model** with a comprehensive `BasePage` (waits, scrolling, screenshots, assertions)
-- **15+ test cases** across 6 test files covering login, dropdowns, dynamic controls, checkboxes, file upload, and hovers
-- **Data-driven tests** via `pytest.mark.parametrize` and centralised test data classes
-- **Custom markers**: `smoke`, `regression`, `critical`
-- **Screenshot on failure** saved automatically under `screenshots/failures/` and attached to Allure
-- **Allure reporting** with `@allure.feature`, `@allure.story`, `@allure.title`, `@allure.severity` annotations
-- **Playwright tracing** support for debugging (configurable via `TRACING` env var)
-- **Environment config** via `.env` with sensible defaults
-- **Proper fixture scoping**: session-level browser, function-level context and page
-- **Logging** configured through `pytest.ini`
-
-## Project Structure
-
-```
-playwright-test-demo/
-  pytest.ini                  # Pytest settings, markers, logging
-  requirements.txt            # Python dependencies
-  pages/
-    __init__.py               # Package exports
-    base_page.py              # BasePage with reusable methods (wait, click, fill, assert)
-    login_page.py             # LoginPage (/login)
-    secure_page.py            # SecurePage (/secure)
-    dropdown_page.py          # DropdownPage (/dropdown)
-    dynamic_controls_page.py  # DynamicControlsPage (/dynamic_controls)
-    checkbox_page.py          # CheckboxPage (/checkboxes)
-    file_upload_page.py       # FileUploadPage (/upload)
-    hovers_page.py            # HoversPage (/hovers)
-  tests/
-    __init__.py
-    conftest.py               # Fixtures, hooks, tracing, screenshot-on-failure
-    test_data.py              # Dataclasses and constants for test data
-    test_login.py             # Login tests (valid, invalid, logout) -- 5 cases
-    test_dropdown.py          # Dropdown selection tests -- 4 cases
-    test_dynamic_controls.py  # Dynamic checkbox/input tests -- 3 cases
-    test_checkboxes.py        # Checkbox toggling tests -- 5 cases
-    test_file_upload.py       # File upload tests -- 3 cases
-    test_hovers.py            # Hover interaction tests -- 4 cases
-```
-
-## Prerequisites
-
-- Python 3.10+
-- pip
-
-## Setup
+## Quick start
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-playwright install chromium
+python -m playwright install chromium
+pytest tests/ -v
 ```
 
-## Running Tests
+### Run against a specific browser
 
 ```bash
-# All tests (verbose)
-pytest tests/ -v
-
-# Smoke tests only
-pytest tests/ -v -m smoke
-
-# Regression tests only
-pytest tests/ -v -m regression
-
-# With Allure reporting
-pytest tests/ -v --alluredir=allure-results
-allure serve allure-results
-
-# With Playwright tracing enabled
-TRACING=true pytest tests/ -v
-
-# Run a specific test file
-pytest tests/test_login.py -v
-
-# Run tests matching a keyword
-pytest tests/ -v -k "checkbox"
+pytest tests/ --browser=firefox
+pytest tests/ --browser=webkit
+# or
+BROWSER=firefox pytest tests/
 ```
 
-## Configuration
+### Run in parallel
 
-Create a `.env` file in the project root or export environment variables:
+```bash
+pytest tests/ -n auto              # one worker per CPU
+pytest tests/ -n 4
+```
 
-| Variable          | Default                                    | Description                           |
-|-------------------|--------------------------------------------|---------------------------------------|
-| `BASE_URL`        | `https://the-internet.herokuapp.com`       | Application under test base URL       |
-| `HEADLESS`        | `true`                                     | Run browser in headless mode          |
-| `SLOW_MO`         | `0`                                        | Slow down actions (ms)                |
-| `DEFAULT_TIMEOUT` | `15000`                                    | Default element timeout (ms)          |
-| `TRACING`         | `false`                                    | Enable Playwright tracing (true/false)|
+### API-only run
 
-## Test Coverage Summary
+```bash
+pytest tests/api/ -v
+```
 
-| Area              | Tests | Markers          |
-|-------------------|-------|------------------|
-| Login             | 5     | smoke, critical, regression |
-| Dropdown          | 4     | smoke, regression |
-| Dynamic Controls  | 3     | smoke, regression |
-| Checkboxes        | 5     | smoke, regression |
-| File Upload       | 3     | smoke, regression |
-| Hovers            | 4     | smoke, regression |
-| **Total**         | **24**|                  |
+### BDD feature
+
+```bash
+pytest tests/bdd -v
+```
+
+### Allure report
+
+```bash
+pytest tests/ --alluredir=allure-results
+allure serve allure-results
+```
+
+### Tracing
+
+```bash
+TRACING=true pytest tests/test_login.py
+# traces land in ./traces/*.zip; open with `playwright show-trace <file>`
+```
+
+## Layout
+
+```
+playwright-test-demo/
+  pytest.ini
+  pyproject.toml
+  requirements.txt
+  pages/
+    base_page.py              # shared interactions
+    login_page.py
+    secure_page.py
+    dropdown_page.py
+    dynamic_controls_page.py
+    checkbox_page.py
+    file_upload_page.py
+    hovers_page.py
+  tests/
+    conftest.py               # fixtures, CLI, tracing, screenshots, proxy/BS hookup
+    test_data.py              # data classes + Faker factories
+    test_login.py
+    test_dropdown.py
+    test_dynamic_controls.py
+    test_checkboxes.py
+    test_file_upload.py
+    test_hovers.py
+    test_network_interception.py
+    api/
+      test_jsonplaceholder.py # httpx + Pydantic response model validation
+    bdd/
+      features/login.feature
+      step_defs/test_login_steps.py
+```
+
+## Environment variables
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `BASE_URL` | `https://the-internet.herokuapp.com` | App under test |
+| `BROWSER` | `chromium` | Browser to launch (chromium / firefox / webkit) |
+| `HEADLESS` | `true` | Headless mode |
+| `SLOW_MO` | `0` | Slow down actions (ms) |
+| `DEFAULT_TIMEOUT` | `15000` | Default element timeout (ms) |
+| `TRACING` | `false` | Enable Playwright trace per test |
+| `HTTP_PROXY` | — | Route traffic through a proxy (e.g. `http://localhost:8888`) |
+| `BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY` | — | Run on BrowserStack |
+
+## Notes
+
+- Trace files are written per test so parallel workers don't overwrite each other.
+- Default timeout is 15s; dynamic-controls tests occasionally need more — pass `--timeout=...` if you see flakes on slow networks.
+- BrowserStack capabilities are expected in `browserstack.yml` at the repo root when you enable that path.
