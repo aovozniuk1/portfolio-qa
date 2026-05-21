@@ -64,7 +64,6 @@ mvn allure:serve
 
 - `playwright-test-demo/tests/api/` runs without a browser — useful for a
   "does anything work?" smoke run on a fresh clone.
-- `allure-report-demo/screenshots/` has four Allure report screens (suite
-  overview, timeline, a test detail with step log, categories) if you'd
-  rather not build locally.
+- `allure-report-demo/` documents the Allure setup used by both frameworks
+  (categories, environment, screenshot-on-failure, BDD view).
 - Selenium Grid is optional; pass `-Dselenium.grid.url=...` to switch.

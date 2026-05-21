@@ -25,26 +25,29 @@ API target: [jsonplaceholder.typicode.com](https://jsonplaceholder.typicode.com)
 - `BasePage` — explicit/fluent waits, JS helpers, screenshot helpers, `@Step`s
 - `RetryAnalyzer` — configurable TestNG retries
 - `TestListener` — screenshot-on-failure, log attachment to Allure
-- `CdpTest` — Chrome DevTools Protocol example (network log capture)
-- `JsonPlaceholderApiTest` — RestAssured + AssertJ + schema validation
+- `CdpNetworkTest` — Chrome DevTools Protocol example (network log capture via Selenium 4 `NetworkInterceptor`)
+- `UserApiTest` / `PostApiTest` — RestAssured + AssertJ + schema validation
 
 ## Layout
 
 ```
-src/main/java/
+src/test/java/
   config/
     ConfigReader.java
     DriverFactory.java
   pages/                       # shared BasePage + page objects
-src/test/java/
   tests/                       # TestNG tests (UI)
   api/                         # RestAssured + schema validation
+    ApiBaseTest.java
+    UserApiTest.java
+    PostApiTest.java
+    models/
   junit/                       # JUnit 5 suite (mirrors the core login + dropdown flows)
   bdd/
     CucumberRunner.java        # JUnit-runner for Cucumber
     steps/                     # step definitions
   cdp/
-    CdpNetworkTest.java        # Selenium 4 CDP example
+    CdpNetworkTest.java        # Selenium 4 NetworkInterceptor example
   utils/
 src/test/resources/
   config.properties
